@@ -1,6 +1,7 @@
 // src/components/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // ✅ axios import
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -10,19 +11,19 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/signup`,
+        { username, password }
+      );
 
-      if (res.ok) {
+      if (res.status === 200) {
         navigate("/");
       } else {
         alert("Signup failed, try again!");
       }
     } catch (err) {
       console.error(err);
+      alert("Something went wrong!");
     }
   };
 
@@ -35,7 +36,9 @@ export default function Signup() {
       }}
     >
       <div className="bg-black bg-opacity-80 p-10 rounded-2xl shadow-lg w-96">
-        <h1 className="text-red-600 text-3xl md:text-4xl font-bold mb-6 text-center">Netflix-Signup</h1>
+        <h1 className="text-red-600 text-3xl md:text-4xl font-bold mb-6 text-center">
+          Netflix-Signup
+        </h1>
         <form onSubmit={handleSignup} className="flex flex-col space-y-4">
           <input
             type="text"
@@ -43,6 +46,7 @@ export default function Signup() {
             className="opacity-45 bg-black text-white p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
           />
           <input
             type="password"
@@ -50,10 +54,11 @@ export default function Signup() {
             className="opacity-45 bg-black text-white p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <button
             type="submit"
-            className="bg-red-600 text-white py-2 rounded-lg hover:bg-red-600 transition"
+            className="bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition"
           >
             Signup
           </button>

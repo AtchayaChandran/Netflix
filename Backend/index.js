@@ -1,51 +1,100 @@
-// server.js
 const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 const app = express();
 
-app.use(cors()); // allow frontend to talk to backend
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    /\.vercel\.app$/   // allow any Vercel subdomain
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 
-// load users from file
+// ✅ Detect Vercel (read-only FS)
+const isVercel = process.env.VERCEL === "1";
+let memoryUsers = []; // fallback for Vercel
+
+const USERS_FILE = path.join(__dirname, "users.json");
+
+// load users
 function loadUsers() {
-  return JSON.parse(fs.readFileSync("users.json", "utf8"));
+  try {
+    if (isVercel) return memoryUsers;
+
+    if (!fs.existsSync(USERS_FILE)) {
+      fs.writeFileSync(USERS_FILE, JSON.stringify([]), "utf8");
+      return [];
+    }
+    const raw = fs.readFileSync(USERS_FILE, "utf8").trim();
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("loadUsers error:", err);
+    return [];
+  }
 }
 
-// save users to file
+// save users
 function saveUsers(users) {
-  fs.writeFileSync("users.json", JSON.stringify(users, null, 2));
+  try {
+    if (isVercel) {
+      memoryUsers = users;
+    } else {
+      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf8");
+    }
+  } catch (err) {
+    console.error("saveUsers error:", err);
+  }
 }
 
-// signup (create new user)
+function badReq(res, msg) {
+  return res.status(400).json({ success: false, message: msg });
+}
+
 app.post("/signup", (req, res) => {
   const { username, password } = req.body;
-  let users = loadUsers();
+  if (!username || !password) return badReq(res, "username and password required");
 
+  let users = loadUsers();
   if (users.find(u => u.username === username)) {
     return res.json({ success: false, message: "User already exists" });
   }
 
   users.push({ username, password });
   saveUsers(users);
-
   res.json({ success: true, message: "Signup successful" });
 });
 
-// login (check existing user)
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) return badReq(res, "username and password required");
+
   let users = loadUsers();
+  const user = users.find(u => u.username === username && u.password === password);
 
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
-
-  if (user) {
-    res.json({ success: true, message: "Login successful" });
-  } else {
-    res.json({ success: false, message: "Invalid credentials" });
-  }
+  if (user) return res.json({ success: true, message: "Login successful" });
+  return res.json({ success: false, message: "Invalid credentials" });
 });
 
-app.listen(5000, () => console.log("Backend running on http://localhost:5000"));
+app.get("/", (req, res) => res.send("✅ Backend is running"));
+
+// ✅ LOCAL only
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+}
+
+// ✅ VERCEL needs this
+module.exports = app;
+
+// error handling
+process.on("unhandledRejection", err => console.error("unhandledRejection:", err));
+process.on("uncaughtException", err => console.error("uncaughtException:", err));

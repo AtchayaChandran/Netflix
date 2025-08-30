@@ -3,6 +3,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Success from "./components/Success";
 import Fail from "./components/Fail";
+import Watch from "./components/Watch";
 
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
+        <Route path="/Watch" element={<Watch/>}/>
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // ✅ axios for API calls
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -9,18 +10,15 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/login`,
+        { username, password }
+      );
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (res.data.success) {
         localStorage.setItem("username", username);
-        localStorage.setItem("token", data.token || "dummy_token"); 
-        navigate("/success"); 
+        localStorage.setItem("token", res.data.token || "dummy_token"); 
+        navigate("/success");
       } else {
         navigate("/fail");
       }
@@ -39,7 +37,9 @@ export default function Login() {
       }}
     >
       <div className="bg-black bg-opacity-80 p-10 rounded-2xl shadow-md w-96 border border-black">
-        <h1 className="text-red-600 text-4xl md:text-5xl font-bold mb-6 text-center">Netflix</h1>
+        <h1 className="text-red-600 text-3xl md:text-4xl font-bold mb-6 text-center">
+          Netflix-Login
+        </h1>
 
         <form onSubmit={handleLogin} className="flex flex-col space-y-4">
           <input
@@ -48,6 +48,7 @@ export default function Login() {
             className="opacity-45 bg-black text-white p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
           />
           <input
             type="password"
@@ -55,6 +56,7 @@ export default function Login() {
             className="opacity-45 bg-black text-white p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <button
             type="submit"
