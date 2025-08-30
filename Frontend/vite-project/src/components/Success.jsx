@@ -4,7 +4,15 @@ import { useNavigate } from "react-router-dom";
 export default function Success() {
   const navigate = useNavigate();
 
-  const user = localStorage.getItem("username") || "User";
+  const profiles = [
+    { id: 1, name: localStorage.getItem("username") || "User", avatar: "https://i.pinimg.com/originals/59/48/cb/5948cb6f239d1681f2b808c705206025.jpg" },
+    { id: 2, name: "Priya", avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTf6P-uZQ-LFywB7T5XA0ReiicsmNNfJmd8Dw&s" },
+  ];
+
+  const handleProfileClick = (name) => {
+    localStorage.setItem("username", name);
+    navigate("/Watch");
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("username");
@@ -12,34 +20,32 @@ export default function Success() {
     navigate("/");
   };
 
-  const handleWatch = () => {
-    navigate("/Watch"); 
-  };
-
   return (
     <div
-      className="p-6 min-h-screen flex items-center justify-center bg-cover bg-center"
+      className="min-h-screen flex flex-col items-center justify-center bg-black text-white"
       style={{
-        backgroundImage:
-          "url('https://i.redd.it/zjgs096khv591.jpg')",
       }}
     >
-      <div className="bg-black bg-opacity-80 text-red-600 p-12 rounded-2xl shadow-lg text-center w-96">
-        <h1 className="text-[23px] md:text-3xl font-bold mb-4 ">
-          Welcome back, {user}!
-        </h1>
-        <p className="text-[14px] text-gray-500 font-semibold mb-6">
-          Grab your popcorn, it's movie time!
-        </p>
+      <h1 className="text-3xl md:text-5xl font-bold mb-8 text-red-600">
+        Who's watching?
+      </h1>
 
-     
-        <button
-          className="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-500 transition mr-3"
-          onClick={handleWatch}  
-        >
-          Watch Now
-        </button>
+      <div className="flex space-x-6 mb-8">
+        {profiles.map((profile) => (
+          <div
+            key={profile.id}
+            className="flex flex-col items-center cursor-pointer hover:scale-105 transform transition"
+            onClick={() => handleProfileClick(profile.name)}
+          >
+            <img
+              src={profile.avatar}
+              alt={profile.name}
+              className="w-36 h-36 md:w-48 md:h-48 rounded-full border-4 border-red-600 mb-3"
+            />
+            <span className="text-xl font-semibold">{profile.name}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
-}
+} 
