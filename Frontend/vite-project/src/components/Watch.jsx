@@ -94,7 +94,7 @@ export default function WatchNow() {
         Logout
       </button>
 
-      <h1 className="text-[27px] md:text-4xl font-extrabold mb-8 mt-[55px] text-red-600">
+      <h1 className="text-[27px] md:text-4xl font-extrabold mb-8 mt-[55px] md:mt-[0] text-red-600">
         Watch Something New
       </h1>
 

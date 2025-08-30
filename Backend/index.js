@@ -11,20 +11,19 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    /\.vercel\.app$/   // allow any Vercel subdomain
+    /\.vercel\.app$/   
   ],
   credentials: true,
 }));
 
 app.use(express.json());
 
-// ✅ Detect Vercel (read-only FS)
+
 const isVercel = process.env.VERCEL === "1";
-let memoryUsers = []; // fallback for Vercel
+let memoryUsers = []; 
 
 const USERS_FILE = path.join(__dirname, "users.json");
 
-// load users
 function loadUsers() {
   try {
     if (isVercel) return memoryUsers;
@@ -42,7 +41,7 @@ function loadUsers() {
   }
 }
 
-// save users
+
 function saveUsers(users) {
   try {
     if (isVercel) {
@@ -86,15 +85,15 @@ app.post("/login", (req, res) => {
 
 app.get("/", (req, res) => res.send("✅ Backend is running"));
 
-// ✅ LOCAL only
+
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
 }
 
-// ✅ VERCEL needs this
+
 module.exports = app;
 
-// error handling
+
 process.on("unhandledRejection", err => console.error("unhandledRejection:", err));
 process.on("uncaughtException", err => console.error("uncaughtException:", err));
